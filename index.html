@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Steam Manifest & Lua Generator</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg1: #0d1822;
+    --bg2: #0f2634;
+    --card-grad: linear-gradient(135deg,#0f1f2b 0%, #0b1722 100%);
+    --neon-blue: #4aa3ff;
+    --neon-purple: #a14bff;
+    --neon-border: linear-gradient(90deg, rgba(74,163,255,1) 0%, rgba(161,75,255,1) 100%);
+    --glass: rgba(255,255,255,0.02);
+    --muted: #98a7b6;
+    --accent-green: #25c57b;
+  }
+
+  /* page */
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: radial-gradient(1200px 700px at 5% 10%, rgba(10,23,35,0.7), transparent 8%),
+                radial-gradient(900px 600px at 95% 90%, rgba(20,12,40,0.55), transparent 6%),
+                linear-gradient(180deg,var(--bg1),var(--bg2));
+    color: #dcecf8;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* header */
+  .wrap{
+    max-width:1100px;
+    margin:40px auto 80px;
+    padding: 30px;
+    box-sizing: border-box;
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:24px;
+  }
+
+  h1{
+    font-family: "Orbitron", sans-serif;
+    font-weight:900;
+    letter-spacing:6px;
+    font-size:68px;
+    margin:0;
+    text-transform:uppercase;
+    color:#eaffff;
+    text-shadow:
+      0 0 12px rgba(74,163,255,0.18),
+      0 0 34px rgba(161,75,255,0.10),
+      0 2px 0 rgba(0,0,0,0.6);
+  }
+
+  header p.lead{
+    margin:10px 0 6px;
+    color: #c7d8ea;
+    font-weight:500;
+    opacity:0.9;
+  }
+
+  header a.smalllink{
+    display:inline-block;
+    margin-top:6px;
+    color: #84b6ff;
+    text-decoration:underline;
+    font-size:14px;
+  }
+
+  /* card */
+  .card{
+    margin-top:28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:28px;
+    box-shadow: 0 8px 30px rgba(4,10,16,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+    position:relative;
+    border: 2px solid rgba(255,255,255,0.03);
+    overflow:visible;
+  }
+
+  /* neon stroke outline (outside) */
+  .card::before{
+    content:"";
+    position:absolute;
+    left:-6px; right:-6px; top:-6px; bottom:-6px;
+    border-radius:18px;
+    padding:2px;
+    background: linear-gradient(90deg, rgba(74,163,255,0.95), rgba(161,75,255,0.95));
+    -webkit-mask: 
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    filter: blur(6px);
+    opacity:0.85;
+    pointer-events:none;
+  }
+
+  .input-row{
+    display:flex;
+    gap:18px;
+    align-items:center;
+  }
+
+  .left{
+    flex:1;
+  }
+
+  .label{
+    font-size:14px;
+    text-transform:uppercase;
+    color:#c7d8ea;
+    margin-bottom:8px;
+    letter-spacing:1px;
+  }
+
+  .appid-input{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background: rgba(255,255,255,0.02);
+    border-radius:10px;
+    padding:14px 16px;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
+  }
+
+  .appid-input .icon{
+    width:28px;height:28px;border-radius:8px;
+    background: linear-gradient(180deg,#2a3d4f,#1b2b36);
+    display:flex;align-items:center;justify-content:center;
+    color:#88c1ff;font-weight:700;font-size:15px;
+    box-shadow: 0 4px 8px rgba(10,20,30,0.6);
+  }
+
+  .appid-input input{
+    background:transparent;border:none;outline:none;color: #cfe9ff;
+    font-size:16px;width:100%;
+  }
+
+  .btn{
+    padding:14px 28px;border-radius:12px;border:none;
+    cursor:pointer;font-weight:700;text-transform:uppercase;
+    letter-spacing:1px;
+    font-family:"Orbitron",sans-serif;
+    box-shadow: 0 8px 18px rgba(10,20,30,0.6);
+  }
+
+  .btn.check{
+    background: linear-gradient(90deg,var(--neon-blue), var(--neon-purple));
+    color:white;
+    min-width:200px;
+  }
+
+  /* terminal-like result box */
+  .term{
+    margin-top:22px;
+    background: linear-gradient(180deg, rgba(7,12,20,0.6), rgba(8,16,24,0.6));
+    border-radius:10px;
+    padding:26px;
+    border-left:6px solid rgba(74,163,255,0.07);
+    font-family: "Courier New", Courier, monospace;
+    color:#8efc93;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    position:relative;
+    min-height:110px;
+  }
+
+  .term .fake-title{
+    position:absolute; left:18px; top:-18px; display:flex; gap:8px; align-items:center;
+  }
+  .fake-dot{ width:12px;height:12px;border-radius:50%;display:inline-block; }
+  .dot-r { background:#ff5f57; box-shadow: 0 0 10px rgba(255,95,87,0.2) }
+  .dot-y { background:#ffbd2e; box-shadow: 0 0 10px rgba(255,189,46,0.18) }
+  .dot-g { background:#27c93f; box-shadow: 0 0 10px rgba(39,201,63,0.12) }
+
+  .term p{ margin:6px 0; white-space:pre-wrap; line-height:1.45; color:#66ff9a; opacity:0.95; font-size:15px; }
+
+  /* download CTA */
+  .cta-wrap{
+    display:flex;
+    justify-content:center;
+    margin:26px 0 6px;
+  }
+
+  .download-btn{
+    background: linear-gradient(90deg,#16b06a,#2ad98e);
+    border-radius:14px;
+    padding:16px 34px;
+    font-weight:800;
+    font-family:"Orbitron",sans-serif;
+    color:white;
+    letter-spacing:1px;
+    font-size:18px;
+    box-shadow: 0 10px 30px rgba(25,120,80,0.12), inset 0 -6px 20px rgba(0,0,0,0.15);
+    border:none;
+    cursor:pointer;
+    display:flex; gap:10px; align-items:center;
+  }
+  .download-btn .icon-down{
+    width:22px;height:22px;display:inline-block;
+    border-radius:6px;background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+
+  /* helper row */
+  .info-row{
+    display:flex;
+    gap:26px;
+    margin-top:26px;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .info{
+    flex:1;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));
+    border-radius:10px;padding:18px;
+  }
+  .info h4{ margin:0 0 8px; font-family:"Orbitron",sans-serif; font-size:16px; color:#eaf6ff;}
+  .info p{ margin:0; color:#b8cadb; font-size:13.5px; line-height:1.45 }
+
+  /* footer small */
+  .footer{
+    text-align:center;
+    color:#98b1c5;margin-top:36px;font-size:13px;
+  }
+
+  /* responsive */
+  @media (max-width:920px){
+    h1{font-size:48px}
+    .info-row{ flex-direction:column; }
+    .input-row{ flex-direction:column; align-items:stretch; }
+    .btn.check{ min-width: auto; width:100%}
+    .appid-input{ width:100% }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Steam Manifest Hub</h1>
+      <p class="lead">Check and download game manifests by Steam AppID</p>
+      <a class="smalllink" href="#">MADE BY B14CK-KN1GH7</a>
+    </header>
+
+    <main class="card">
+      <div class="label">Enter Steam AppID</div>
+
+      <div class="input-row">
+        <div class="left">
+          <div class="appid-input">
+            <div class="icon">🎮</div>
+            <input id="appid" placeholder="e.g. 220968" value="">
+          </div>
+        </div>
+
+        <button id="check" class="btn check">Check Manifest</button>
+      </div>
+
+      <div class="term" id="term">
+        <div class="fake-title">
+          <span class="fake-dot dot-r"></span>
+          <span class="fake-dot dot-y"></span>
+          <span class="fake-dot dot-g"></span>
+        </div>
+
+        <p id="termtext">
+&gt; Awaiting input...
+        </p>
+      </div>
+
+      <div class="cta-wrap">
+        <button id="download" class="download-btn" disabled>
+          <span class="icon-down">⬇</span>
+          <span>Download Manifest</span>
+        </button>
+      </div>
+
+      <div class="info-row" style="margin-top:20px">
+        <div class="info">
+          <h4>How It Works</h4>
+          <p>Enter a Steam AppID to check if a game manifest exists in our database.</p>
+        </div>
+        <div class="info">
+          <h4>Database</h4>
+          <p>Manifests are stored on GitHub and downloaded directly from their servers.</p>
+        </div>
+        <div class="info">
+          <h4>Privacy</h4>
+          <p>No data is stored or logged. All checks happen client-side.</p>
+        </div>
+      </div>
+    </main>
+
+    <div class="footer">© 2025 Steam Manifest Hub | Not affiliated with Valve or Steam</div>
+
+  </div>
+
+<script>
+  // tiny behavior: simulate the check sequence like the screenshots and enable Download
+  const btn = document.getElementById('check');
+  const term = document.getElementById('termtext');
+  const input = document.getElementById('appid');
+  const download = document.getElementById('download');
+
+  function logLine(line, delay=500){
+    return new Promise(res => {
+      setTimeout(()=> {
+        term.textContent = (term.textContent.trim() ? term.textContent + "\\n" : "") + line;
+        term.parentElement.scrollTop = term.parentElement.scrollHeight;
+        res();
+      }, delay);
+    })
+  }
+
+  btn.addEventListener('click', async ()=>{
+    const id = (input.value || '').trim();
+    if(!/^\d+$/.test(id)){
+      term.textContent = "> Please enter a numeric AppID (e.g. 220968)";
+      return;
+    }
+    term.textContent = "> Initiating manifest check for Steam AppID: " + id;
+    download.disabled = true;
+    // simulate
+    await logLine("> Manifest search in database...");
+    await logLine("> Manifest found in database!");
+    await logLine("> Preparing download link...");
+    await logLine("> Ready for download.");
+    download.disabled = false;
+    // change check button look briefly
+    btn.textContent = "Check Complete";
+    btn.style.background = "linear-gradient(90deg,#2db06b,#8b55ff)";
+    setTimeout(()=>{ btn.textContent = "Check Manifest"; btn.style.background="" }, 3000);
+  });
+
+  // fake download (click creates a blob)
+  download.addEventListener('click', ()=>{
+    const id = (input.value || '000');
+    const fakeManifest = {
+      appid: id,
+      fetchedAt: new Date().toISOString(),
+      files: ["manifest_v1.txt"]
+    };
+    const blob = new Blob([JSON.stringify(fakeManifest,null,2)], {type:"application/json"});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `manifest_${id}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // UX: press Enter to check
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') btn.click(); });
+</script>
+</body>
+</html>
