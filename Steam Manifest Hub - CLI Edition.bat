@@ -48,7 +48,7 @@ echo ^> Initiating manifest check for Steam AppID: %appid%
 echo ^> Searching database...
 
 :: GitHub API check with improved error handling
-set "url=https://api.github.com/repos/SteamAutoCracks/ManifestHub/branches/%appid%"
+set "url=https://api.github.com/repos/SSMGAlt/ManifestHub2/branches/%appid%"
 powershell -Command "$ProgressPreference='SilentlyContinue';try{$r=Invoke-WebRequest -Uri '%url%' -UseBasicParsing -ErrorAction Stop;exit 0}catch{exit 1}" >nul 2>&1
 
 if errorlevel 1 (
@@ -66,10 +66,11 @@ echo ^> Preparing download link...
 echo ^> Ready for download.
 echo.
 echo Download link:
-echo https://codeload.github.com/SteamAutoCracks/ManifestHub/zip/refs/heads/%appid%
+echo https://codeload.github.com/SSMGAlt/ManifestHub2/zip/refs/heads/%appid%
 echo.
 echo The manifests are downloaded from the ManifestHub Database.
 echo Show them support on GitHub: https://github.com/SteamAutoCracks/ManifestHub/
+echo UPDATE: SteamAutoCracks has been wiped from GitHub. ManifestHub archive: https://github.com/SSMGAlt/ManifestHub2
 echo.
 pause
 goto :main

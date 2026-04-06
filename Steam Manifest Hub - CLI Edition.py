@@ -84,7 +84,7 @@ def validate_appid(appid):
 
 def check_manifest(appid):
     """Check if manifest exists in the GitHub repository."""
-    url = f'https://api.github.com/repos/SteamAutoCracks/ManifestHub/branches/{appid}'
+    url = f'https://api.github.com/repos/SSMGAlt/ManifestHub2/branches/{appid}'
     
     try:
         response = requests.get(url, timeout=10)
@@ -151,12 +151,13 @@ def main():
         print()
         print_green('Download link:')
         print()
-        print_green(f'https://codeload.github.com/SteamAutoCracks/ManifestHub/zip/refs/heads/{appid}')
+        print_green(f'https://codeload.github.com/SSMGAlt/ManifestHub2/zip/refs/heads/{appid}')
         print()
         print()
         print_green('The manifests are downloaded from the ManifestHub Database.')
         print()
         print_green('Show them support on GitHub: https://github.com/SteamAutoCracks/ManifestHub/')
+        print_green(UPDATE: SteamAutoCracks has been wiped from GitHub. ManifestHub archive: https://github.com/SSMGAlt/ManifestHub2)
         print()
         print()
         input_green('Press ENTER to continue...')
